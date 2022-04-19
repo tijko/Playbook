@@ -1,0 +1,10 @@
+---
+# olm_ssl_ca_url: 
+olm_ssl_ca_cert: "/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT"
+olm_ssl_cert: "/pub/RHN-ORG-TRUSTED-SSL-CERT"
+olm_ssl_cert_rpm: "/pub/rhn-org-trusted-ssl-cert-1.0-1.noarch.rpm"
+olm_managed_packages:
+ - osad
+ - rhncfg 
+ - rhncfg-actions 
+ - rhncfg-client

@@ -1,0 +1,108 @@
+---
+- name: Gather variables for each operating system
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}.yml"
+  tags: osbase
+
+- name: Get local CA cert
+  get_url:
+    url: "{{ olm_ssl_ca_url }}"
+    dest: "{{ olm_ssl_ca_cert }}"
+  when: olm_ssl_ca_url is defined  
+
+- name: Install appropriate repository configuration
+  package:
+    name: "{{ olm_spacewalk_repo }}"
+    state: installed
+  ignore_errors: true
+  tags: osbase
+
+- name: Install additional packages
+  package:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - "{{ olm_packages }}"  
+  tags: osbase
+
+- name: Download and Install the CA certificate file 
+  yum:
+    name: "http://{{ olm_master_url }}/{{ olm_ssl_cert_rpm }}"
+    state: installed
+    validate_certs: no
+    disable_gpg_check: true
+  tags: 
+    - osbase
+    - olmreg
+
+- name: Remove conflict packages
+  package:
+    name: "{{ olm_remove_packages }}"
+    state: absent
+  tags: osbase
+
+- name: Register with "{{ olm_master_url }}"
+  community.general.rhn_register:
+    state: present
+    activationkey: "{{ olm_activation_key }}"
+    server_url: "https://{{ olm_master_url }}/XMLRPC"
+    ca_cert: /etc/ipa/ca.crt
+    force: false
+  tags: olmreg
+
+- name: Remove Spacewalk repository 
+  package:
+    name: "{{ olm_spacewalk_repo }}"
+    state: absent
+  ignore_errors: true  
+  tags: osbase
+
+- name: Check yum/dnf plugins
+  lineinfile:
+    dest: "/etc/yum.conf"
+    line: 'plugins=1'
+    state: present
+  tags:
+    - osbase
+
+- name: Autoremove unneeded packages installed as dependencies
+  yum:
+    autoremove: yes
+
+- name: Clean yum/dnf cache
+  command: yum clean all
+
+- name: Ensure all updates are installed
+  package:
+    name: '*'
+    state: latest
+  tags:
+    - osbase
+
+- name: Check for pending client tasks
+  command: rhn_check
+
+- name: Ensure management packages are installed
+  package:
+    name: "{{ item }}"
+    state: installed
+  with_items: "{{ olm_managed_packages }}"
+  tags:
+    - osbase
+
+- name: Ensure OSA daemon is running
+  service:
+    name: osad
+    enabled: true
+    state: started
+  tags:
+    - osbase
+
+- name: Enable rhn actions
+  command: rhn-actions-control --enable-all
+
+  

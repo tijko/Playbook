@@ -1,0 +1,68 @@
+- name: Katello | Add local repository
+  yum_repository:
+    name: local-8
+    description: Local EL 8 RPMs
+    baseurl: "{{ rhbase_kt_localrepo }}"
+    gpgcheck: no
+
+
+- name: Katello | Clean yum/dnf cache
+  command: yum clean all
+
+- name: Katello | Checking subscription certificates
+  package:
+    name: subscription-manager
+    state: present
+
+- name: Katello | Install certificate package
+  package:
+    name: "{{ rhbase_kt_certs}}"
+    state: present
+    validate_certs: no
+    disable_gpg_check: yes
+
+- name: Katello | Register system to Katello
+  redhat_subscription:
+    state: present
+    activationkey: "{{ rhbase_kt_activationkey }}"
+    org_id: "{{ rhbase_kt_org_id }}"
+  register: subscription 
+
+#- block: 
+  # - name: Katello | Remove default repositories
+  #   yum_repository:
+  #     name: "{{ item }}"
+  #     file: CentOS-Base
+  #     state: absent
+  #   with_items:
+  #     - base
+  #     - updates
+  #     - extras
+
+  # - name: Katello | Remove external EPEL
+  #   yum_repository:
+  #     name: epel
+  #     file: epel
+  #     state: absent
+  #   notify: yum-clean-metadata  
+  # when: subscription["msg"] == "System successfully registered*" or "System already registered."
+  
+- name: Katello | Run package updates
+  package:
+    name: '*'
+    state: latest
+  register: updated
+
+- name: Katello | Reboot immediately if system was updated.
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+  when: updated.changed 
+
+- name: Katello | Wait for the reboot to complete 
+  wait_for_connection:
+    connect_timeout: 20
+    sleep: 5
+    delay: 5
+    timeout: 300
+  when: updated.changed

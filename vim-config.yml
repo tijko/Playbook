@@ -1,0 +1,9 @@
+- name: Config vim with plugins
+  hosts: Debian
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Configure Vim using role
+      import_role:
+        name: vim

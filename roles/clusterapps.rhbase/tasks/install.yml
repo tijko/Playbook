@@ -1,0 +1,109 @@
+---
+- name: Install | Ensure the machine-ID is available
+  command: systemd-machine-id-setup
+  args:
+    creates: /etc/machine-id
+  tags: rhbase
+
+- name: Install | Ensure basic services are running
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items: "{{ rhbase_systemd_services }}"
+  tags: rhbase
+
+- name: Install | Ensure specified packages are NOT installed
+  package:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ rhbase_remove_packages }}"
+  tags:
+    - rhbase
+    - install
+
+- name: Install | Run Katello configuration
+  include: katello.yml
+  tags:
+    - rhbase
+    - install
+  when: rhbase_kt_managed == true
+
+- name: Install | Role/Ansible dependencies
+  package:
+    name: "{{ item }}"
+    state: installed
+  with_items: "{{ rhbase_dependencies }}"
+  tags:
+    - rhbase
+    - install
+
+- name: Install | Package management configuration ({{ rhbase_package_manager }})
+  template:
+    src: etc_{{ rhbase_package_manager }}.conf.j2
+    dest: "{{ rhbase_package_manager_configuration }}"
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - rhbase
+    - install
+
+- name: Install | Ensure specified external repositories are installed
+  package:
+    name: "{{ item }}"
+    state: installed
+  with_items: "{{ rhbase_repositories }}"
+  tags:
+    - rhbase
+    - install
+
+- name: Install | Ensure specified repositories are enabled
+  lineinfile:
+    dest: "/etc/yum.repos.d/{{ item }}.repo"
+    line: 'enabled=1'
+    state: present
+    regexp: '^enabled='
+  with_items: "{{ rhbase_enable_repos }}"
+  tags:
+    - rhbase
+    - install
+
+- name: Install | Run package updates
+  package:
+    name: '*'
+    state: latest
+  register: updated
+  when: rhbase_update
+  tags:
+    - rhbase
+    - install
+
+- name: Reboot if updated
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+  when: updated.changed 
+  tags:
+    - rhbase
+    - install
+
+- name: Wait for the reboot to complete 
+  wait_for_connection:
+    connect_timeout: 20
+    sleep: 5
+    delay: 5
+    timeout: 300
+  when: updated.changed
+  tags:
+    - rhbase
+    - install
+
+- name: Install | Ensure specified packages are installed
+  package:
+    name: "{{ item }}"
+    state: installed
+  with_items: "{{ rhbase_install_packages }}"
+  tags:
+    - rhbase
+    - install

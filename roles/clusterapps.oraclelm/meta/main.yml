@@ -1,0 +1,19 @@
+galaxy_info:
+  author: Michael Cleary 
+  description: Register Oracle Linux client to Oracle Linux Manager
+  role_name: oraclelm
+
+  license: BSD-3-Clause
+
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: EL
+      versions:
+        - 7
+        - 8
+  galaxy_tags:
+    - system
+
+dependencies: []
+  

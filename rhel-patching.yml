@@ -1,0 +1,8 @@
+---
+- hosts: RedHatOne,RedHatTwo
+#  collections:
+#   - ataha.linux_patching
+  tasks:
+   - name: Red Hat Patching
+     import_role:
+      name: patching

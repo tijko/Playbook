@@ -1,0 +1,10 @@
+olm_spacewalk_repo: oracle-spacewalk-client-release-el7
+olm_packages:
+  - rhn-client-tools
+  - rhn-check
+  - rhn-setup
+  - rhnsd
+  - m2crypto
+  - yum-rhn-plugin
+
+olm_remove_packages: []

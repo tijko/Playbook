@@ -1,0 +1,12 @@
+olm_spacewalk_repo: oracle-linux-manager-client-release-el8
+olm_packages:
+  - python3-rhnlib
+  - python3-spacewalk-usix
+  - rhn-client-tools
+  - rhn-check
+  - rhn-setup
+  - rhnsd
+  - dnf-plugin-spacewalk
+
+olm_remove_packages:
+ - rhnlib

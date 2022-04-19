@@ -1,0 +1,49 @@
+--
+- hosts: olvm
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  vars_files:
+   - password.yml
+  tasks:
+   - name: Login to OLVM manager
+     ovirt_auth:
+      hostname: "{{ olvm_fqdn }}"
+      username: "{{ olvm_user }}"
+      password: "{{ olvm_password }}"
+      ca_file: "{{ olvm_cafile | default(omit) }}"
+      insecure: "{{ olvm_insecure | default(true) }}"
+     tags:
+      - always
+   - name: Create Virtual Machine(s)
+     ovirt_vm:
+      auth: "{{ ovirt_auth }}"
+      cluster: "{{ olvm_cluster | default('Default') }}"
+      template: "{{ olvm_template }}"
+      name: "{{ item }}"
+      state: running
+      memory: "{{ hostvars[item]['vm_ram'] | default('1GiB') }}"
+      high_availability: yes
+      cloud_init:
+       host_name: "{{ hostvars[item]['ansible_host'] }}"
+       user_name: root
+       root_password: "{{ vm_root_passwd }}"
+       dns_servers: "{{ vm_dns }}"
+       dns_search: "{{ vm_dns_domain }}"
+       nic_name: "{{ vm_nicname | default('eth0') }}"
+       nic_on_boot: true
+       nic_boot_protocol: static
+       nic_ip_address: "{{ hostvars[item]['ansible_ssh_host'] }}"
+       nic_gateway: "{{ vm_gateway }}"
+       nic_netmask: "{{ vm_netmask }}"
+       timezone: "{{ vm_timezone }}"
+       custom_script: |
+        runcmd:
+         - hostnamectl set-hostname {{ hostvars[item]['ansible_host'] }}
+         - yum -y remove cloud-init
+      wait: true
+     loop: "{{ groups['virtualmachines'] }}"
+   - name: Cleanup OLVM auth token
+     ovirt_auth:
+      ovirt_auth: "{{ ovirt_auth }}"
+      state: absent

@@ -1,0 +1,79 @@
+---
+- name: Security | Set SELinux
+  selinux:
+    policy: targeted
+    state: "{{ rhbase_selinux_state }}"
+  tags:
+    - rhbase
+    - security
+
+- name: Security | Enable SELinux booleans
+  seboolean:
+    name: "{{ item }}"
+    state: yes
+    persistent: yes
+  with_items: "{{ rhbase_selinux_booleans }}"
+  tags:
+    - rhbase
+    - security
+
+- name: Security | Set firewalld
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+  when: rhbase_firewall_enabled == true 
+  tags:
+    - rhbase
+    - security
+
+- name: Security | Make sure basic services can pass through firewall
+  firewalld:
+    service: "{{ item }}"
+    permanent: true
+    state: enabled
+  with_items:
+    - dhcpv6-client
+    - ssh
+  when: rhbase_firewall_enabled == true  
+  notify:
+    - restart firewalld
+  tags:
+    - rhbase
+    - security
+
+- name: Security | Configure firewall services for services
+  firewalld:
+    service: "{{ item }}"
+    permanent: true
+    state: enabled
+  with_items: "{{ rhbase_firewall_allow_services }}"
+  notify:
+    - restart firewalld
+  tags:
+    - rhbase
+    - security
+
+- name: Security | Configure firewall ports for services
+  firewalld:
+    port: "{{ item }}"
+    permanent: true
+    state: enabled
+  with_items: "{{ rhbase_firewall_allow_ports }}"
+  notify:
+    - restart firewalld
+  tags:
+    - rhbase
+    - security
+    
+- name: Security | Make sure specified interfaces are added
+  firewalld:
+    interface: "{{ item }}"
+    permanent: true
+    state: enabled
+  with_items: "{{ rhbase_firewall_interfaces }}"
+  notify:
+    - restart firewalld
+  tags:
+    - rhbase
+    - security
