@@ -1,0 +1,7 @@
+---
+
+- name: Show the current uptime
+  shell: uptime
+  register: command_output
+- debug:
+      var: command_output.stdout

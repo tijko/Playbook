@@ -1,0 +1,24 @@
+---
+# vars file for ubuntu_patching
+services:
+    - dbus
+    - systemd-udevd
+    - systemd-logind
+    - systemd-resolved
+    - systemd-containerd
+    - docker
+    - systemd-networkd
+    - sshd
+    - ntp
+    - lvm
+
+drivers:
+    - iwlwifi
+    - iptables
+    - lvm
+    - loop
+    - tun
+
+packages:
+    - coreutils
+  

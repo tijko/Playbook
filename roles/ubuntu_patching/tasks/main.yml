@@ -1,0 +1,38 @@
+---
+- import_tasks: packages.yml
+  tags: ubuntu-packages
+  become_user: root 
+  become_method: sudo
+  become: true
+
+- import_tasks: housekeeping.yml
+  become_user: root
+  become_method: sudo
+  become: true
+
+- import_tasks: uptime.yml
+
+- import_tasks: df.yml
+
+- import_tasks: top.yml
+
+- name: Udev is running
+  ansible.builtin.systemd:
+      state: started
+      name: systemd-udevd
+
+- name: resolvd is running
+  ansible.builtin.systemd:
+      state: started
+      name: systemd-resolved
+
+- name: dbus is running
+  ansible.builtin.systemd:
+      state: started
+      name: dbus
+
+- name: ssh is running
+  ansible.builtin.systemd:
+      state: started
+      enabled: true
+      name: sshd

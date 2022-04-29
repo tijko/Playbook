@@ -1,0 +1,25 @@
+# Tasks for bringing Ubuntu VM up to date and patched
+# [ housekeeping.yml ]
+#
+# Author: Tim Konick (tkonick@nedelta.com)
+#
+- name: "Apt Get Update"
+  apt:
+      name: "*"
+      state: latest
+      update_cache: true
+      autoremove: true
+  become_user: root
+  become_method: sudo
+  become: true
+
+- name: "Install Boto"
+  apt:
+      name: "python3-boto"
+      install-recommends: true
+      state: latest
+      autoremove: true
+      update_cache: true
+  become_user: root
+  become_method: sudo
+  become: true

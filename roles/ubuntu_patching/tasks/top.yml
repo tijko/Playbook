@@ -1,0 +1,7 @@
+---
+
+- name: Show the current uptime
+  shell: top -b -n 1 
+  register: command_output
+- debug:
+      var: command_output.stdout

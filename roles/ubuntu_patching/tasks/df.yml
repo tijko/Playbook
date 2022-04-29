@@ -1,0 +1,7 @@
+---
+
+- name: Show the current uptime
+  shell: df -h 
+  register: command_output
+- debug:
+      var: command_output.stdout
