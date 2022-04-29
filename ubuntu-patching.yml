@@ -1,6 +1,8 @@
 ---
-- hosts: Ubuntu
+- name: Update Ubuntu
+  hosts: Ansible
+  gather_facts: true
   tasks:
-   - name: Ubuntu-Patching
+   - name: ubuntu_patching
      import_role:
-      name: ubuntu-patching
+      name: ubuntu_patching
