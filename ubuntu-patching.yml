@@ -1,6 +1,6 @@
 ---
 - name: Update Ubuntu
-  hosts: Ansible
+  hosts: Ubuntu 
   gather_facts: true
   tasks:
    - name: ubuntu_patching
