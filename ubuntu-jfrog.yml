@@ -1,0 +1,14 @@
+---
+- name: Install Artifactory 
+  hosts: Jfrog-Database
+  roles:
+    - postgres
+  hosts: Ubuntu 
+  gather_facts: true
+  tasks:
+    - name: Deploy Artifactory
+      import_role:
+        name: artifactory
+  hosts: Jfrog-XRay
+  roles:
+    - xray

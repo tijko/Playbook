@@ -1,0 +1,28 @@
+Installing charts...
+>>> helm version --short
+>>> git rev-parse --is-inside-work-tree
+>>> git merge-base origin/master HEAD
+>>> git diff --find-renames --name-only ce1bebacdf5b2933ebb15c5884aa670747cc4054 -- stable
+
+------------------------------------------------------------------------------------------------------------------------
+ Charts to be processed:
+------------------------------------------------------------------------------------------------------------------------
+ artifactory-cpp-ce => (version: "107.46.3", path: "stable/artifactory-cpp-ce")
+ artifactory-ha => (version: "107.46.3", path: "stable/artifactory-ha")
+ artifactory-jcr => (version: "107.46.3", path: "stable/artifactory-jcr")
+ artifactory-oss => (version: "107.46.3", path: "stable/artifactory-oss")
+ artifactory => (version: "107.46.3", path: "stable/artifactory")
+------------------------------------------------------------------------------------------------------------------------
+
+>>> helm repo add jfrog https://charts.jfrog.io
+"jfrog" has been added to your repositories
+>>> helm repo add bitnami https://charts.bitnami.com/bitnami
+"bitnami" has been added to your repositories
+>>> helm repo add hashicorp https://helm.releases.hashicorp.com
+"hashicorp" has been added to your repositories
+>>> helm dependency build stable/artifactory-cpp-ce
+Error: directory stable/artifactory-cpp-ce/charts/artifactory not found
+------------------------------------------------------------------------------------------------------------------------
+No chart changes detected.
+------------------------------------------------------------------------------------------------------------------------
+Error installing charts: Error building dependencies for chart 'artifactory-cpp-ce => (version: "107.46.3", path: "stable/artifactory-cpp-ce")': Error waiting for process: exit status 1
